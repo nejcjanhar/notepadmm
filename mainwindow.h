@@ -13,6 +13,7 @@
 #include <QPageSetupDialog>
 
 #include "settings.h"
+#include "multitabedit.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,6 +30,19 @@ public:
     void MainWindow::closeEvent(QCloseEvent *event);
 
 private slots:
+
+    void tabTextUndoAvaible(bool b);
+
+    void tabTextRedoAvaible(bool b);
+
+    void tabTextCopyAvaible(bool b);
+
+    void tabTextChange();
+
+    void tabChange(int index);
+
+    void tabTextCurChange();
+
     void clipboardChanged();
 
     void on_actionRazveljavi_triggered();
@@ -41,19 +55,11 @@ private slots:
 
     void on_actionShrani_kot_triggered();
 
-    void on_plainTextEdit_textChanged();
-
     void on_actionOdpri_triggered();
 
     void on_actionZavrzi_spremembe_triggered();
 
     void on_actionNajdi_triggered();
-
-    void on_plainTextEdit_undoAvailable(bool b);
-
-    void on_plainTextEdit_copyAvailable(bool b);
-
-    void on_plainTextEdit_redoAvailable(bool b);
 
     void on_actionIzberi_vse_triggered();
 
@@ -101,8 +107,6 @@ private slots:
 
     void on_toolButtonSettings_clicked();
 
-    void on_plainTextEdit_cursorPositionChanged();
-
     void on_actionNatisni_triggered();
 
     void on_actionNastavitev_strani_triggered();
@@ -117,22 +121,42 @@ private slots:
 
     void on_actionPrivzeta_povecava_triggered();
 
+    void on_actionZapri_triggered();
+
+    void on_toolButtonClose_clicked();
+
+    void on_toolButtonSaveAll_clicked();
+
+    void on_toolButtonCloseAll_clicked();
+
+    void on_actionShrani_vse_triggered();
+
+    void on_actionZapri_vse_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     Settings *set = new Settings();
 
     QPrinter printer;
-    QFile file;
-    QString filename;
 
-    bool textChanged;
+    MultiTabEdit *tabEdit;
+
+    tabTextEdit *curTab;
+
+    QPlainTextEdit* curPlainTextEdit;
+    QString curFilename;
+    int curIndex;
+
     bool searchBarVisible;
     bool replaceBarVisible;
+
+    bool closingTabs;
+
     int zoom;
 
-    int fileChanged();
-    bool save();
+    int fileChanged(QString filename, QString text,int index);
+    bool save(QString filename="",QString text="",int index=-2);
 };
 
 #endif // MAINWINDOW_H

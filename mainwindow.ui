@@ -49,31 +49,6 @@ QPushButton#pushButton_fullword:checked
    <enum>QTabWidget::Rounded</enum>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPlainTextEdit" name="plainTextEdit">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>40</y>
-      <width>0</width>
-      <height>0</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Consolas</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-    <property name="horizontalScrollBarPolicy">
-     <enum>Qt::ScrollBarAlwaysOn</enum>
-    </property>
-    <property name="lineWrapMode">
-     <enum>QPlainTextEdit::NoWrap</enum>
-    </property>
-   </widget>
    <widget class="QWidget" name="searchWidget" native="true">
     <property name="geometry">
      <rect>
@@ -301,9 +276,9 @@ QPushButton#pushButton_fullword:checked
     <widget class="QWidget" name="">
      <property name="geometry">
       <rect>
-       <x>1</x>
-       <y>0</y>
-       <width>535</width>
+       <x>2</x>
+       <y>1</y>
+       <width>649</width>
        <height>33</height>
       </rect>
      </property>
@@ -343,7 +318,7 @@ QPushButton#pushButton_fullword:checked
       <item>
        <widget class="QToolButton" name="toolButtonOpen">
         <property name="toolTip">
-         <string>Odpri</string>
+         <string>Odpri dokument</string>
         </property>
         <property name="text">
          <string/>
@@ -369,7 +344,7 @@ QPushButton#pushButton_fullword:checked
       <item>
        <widget class="QToolButton" name="toolButtonSave">
         <property name="toolTip">
-         <string>Shrani</string>
+         <string>Shrani dokument</string>
         </property>
         <property name="text">
          <string/>
@@ -389,6 +364,90 @@ QPushButton#pushButton_fullword:checked
         </property>
         <property name="autoRaise">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonSaveAll">
+        <property name="toolTip">
+         <string>Shrani vse trenutno odprte dokumente</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>resources/icons/saveall.png</normaloff>resources/icons/saveall.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonClose">
+        <property name="toolTip">
+         <string>Zapri dokument</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>resources/icons/close.png</normaloff>resources/icons/close.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="toolButtonCloseAll">
+        <property name="toolTip">
+         <string>Zapri vse trenutno odprte dokumente</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>resources/icons/closeall.png</normaloff>resources/icons/closeall.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="popupMode">
+         <enum>QToolButton::DelayedPopup</enum>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+        <property name="arrowType">
+         <enum>Qt::NoArrow</enum>
         </property>
        </widget>
       </item>
@@ -893,7 +952,6 @@ QPushButton#pushButton_fullword:checked
     </property>
    </widget>
    <zorder>toolbarWidget</zorder>
-   <zorder>plainTextEdit</zorder>
    <zorder>searchWidget</zorder>
    <zorder>toolButtonSwitch</zorder>
    <zorder>replaceWidget</zorder>
@@ -916,7 +974,11 @@ QPushButton#pushButton_fullword:checked
     <addaction name="actionNov"/>
     <addaction name="actionOdpri"/>
     <addaction name="actionShrani"/>
+    <addaction name="actionShrani_vse"/>
     <addaction name="actionShrani_kot"/>
+    <addaction name="separator"/>
+    <addaction name="actionZapri"/>
+    <addaction name="actionZapri_vse"/>
     <addaction name="separator"/>
     <addaction name="actionNastavitev_strani"/>
     <addaction name="actionNatisni"/>
@@ -1106,11 +1168,23 @@ QPushButton#pushButton_fullword:checked
     <string>Ctrl+/</string>
    </property>
   </action>
+  <action name="actionShrani_vse">
+   <property name="text">
+    <string>Shrani vse</string>
+   </property>
+  </action>
+  <action name="actionZapri">
+   <property name="text">
+    <string>Zapri</string>
+   </property>
+  </action>
+  <action name="actionZapri_vse">
+   <property name="text">
+    <string>Zapri vse</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <tabstops>
-  <tabstop>plainTextEdit</tabstop>
- </tabstops>
  <resources/>
  <connections/>
 </ui>
