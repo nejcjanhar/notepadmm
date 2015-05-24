@@ -973,7 +973,7 @@ QPushButton#pushButton_fullword:checked
     </property>
     <widget class="QMenu" name="menuZapri_vec">
      <property name="title">
-      <string>Zapri vec</string>
+      <string>Zapri več</string>
      </property>
      <addaction name="actionZapri_vse_razen_tega"/>
      <addaction name="actionZapri_vse_na_levo"/>
