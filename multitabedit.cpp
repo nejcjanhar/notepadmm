@@ -5,6 +5,8 @@ MultiTabEdit::MultiTabEdit(QWidget *widget,QString path)
     saveFile.setFileName("last.dat");
 
     tabZoom=0;
+    textColor.setNamedColor("silver");
+    lineWrap=true;
     tabWidget = new QTabWidget(widget);
 
     connect(tabWidget,&QTabWidget::currentChanged,this,&MultiTabEdit::tabChange);
@@ -324,9 +326,9 @@ void MultiTabEdit::saveData()
     {
         if(saveFile.exists())
         {
-            int result=QMessageBox::critical(NULL,"Napaka pri shranjevanju","Datoteke last.dat ni bilo mogoce odpreti za pisanje.",QMessageBox::Retry | QMessageBox::Ok);
+            int result=QMessageBox::critical(NULL,"Napaka pri shranjevanju","Datoteke last.dat ni bilo mogoče odpreti za pisanje.",QMessageBox::Retry | QMessageBox::Ok);
             if(result==QMessageBox::Retry)
-                loadData();
+                saveData();
         }
         return;
     }
@@ -347,7 +349,7 @@ void MultiTabEdit::loadData()
     {
         if(saveFile.exists())
         {
-            int result=QMessageBox::critical(NULL,"notepad--","Datoteke last.dat ni bilo mogoce odpreti za branje.",QMessageBox::Retry | QMessageBox::Ok);
+            int result=QMessageBox::critical(NULL,"notepad--","Datoteke last.dat ni bilo mogoče odpreti za branje.",QMessageBox::Retry | QMessageBox::Ok);
             if(result==QMessageBox::Retry)
                 loadData();
         }
@@ -406,4 +408,39 @@ void MultiTabEdit::changeIndex(int index)
 {
     tabWidget->setCurrentIndex(index);
 }
+
+void MultiTabEdit::setTextColor(QColor color)
+{
+   textColor = color;
+
+   getEdit(getCurrentTabIndex())->setStyleSheet("color: " + color.name() + ";");
+}
+
+void MultiTabEdit::setTextFont(QFont font)
+{
+    textFont = font;
+    getEdit(getCurrentTabIndex())->setFont(font);
+}
+
+void MultiTabEdit::setLineWrap(bool b)
+{
+    lineWrap = b;
+    getEdit(getCurrentTabIndex())->setLineWrapMode((QPlainTextEdit::LineWrapMode)b);
+}
+
+QColor MultiTabEdit::getTextColor()
+{
+    return textColor;
+}
+
+QFont MultiTabEdit::getTextFont()
+{
+    return  textFont;
+}
+
+bool MultiTabEdit::getLineWrap()
+{
+    return lineWrap;
+}
+
 

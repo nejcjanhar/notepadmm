@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>300</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>400</width>
-    <height>300</height>
+    <width>300</width>
+    <height>200</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>400</width>
-    <height>300</height>
+    <width>300</width>
+    <height>200</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -34,11 +34,37 @@
   <property name="whatsThis">
    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Okno nastavitev&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QToolButton {
+    background-color: transparent;
+    border: 1px solid #4a4949;
+    border-radius: 2px;
+    margin: 3px;
+    padding: 3px;
+}
+
+QToolButton[popupMode=&quot;1&quot;] { /* only for MenuButtonPopup */
+ padding-right: 20px; /* make way for the popup button */
+ border: 1px transparent #4A4949;
+ border-radius: 5px;
+}
+
+QToolButton[popupMode=&quot;2&quot;] { /* only for InstantPopup */
+ padding-right: 10px; /* make way for the popup button */
+ border: 1px transparent #4A4949;
+}
+
+
+QToolButton:hover, QToolButton::menu-button:hover {
+    background-color: transparent;
+    border: 1px solid #78879b;
+}</string>
+  </property>
   <widget class="QPushButton" name="pushButtonCancel">
    <property name="geometry">
     <rect>
-     <x>310</x>
-     <y>270</y>
+     <x>220</x>
+     <y>160</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -56,8 +82,8 @@
   <widget class="QPushButton" name="pushButtonSave">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>270</y>
+     <x>130</x>
+     <y>160</y>
      <width>75</width>
      <height>23</height>
     </rect>
@@ -80,8 +106,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
-     <height>250</height>
+     <width>300</width>
+     <height>150</height>
     </rect>
    </property>
    <property name="whatsThis">
@@ -91,7 +117,7 @@
     <enum>QTabWidget::Triangular</enum>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tabGeneral">
     <property name="whatsThis">
@@ -119,30 +145,11 @@
       <bool>true</bool>
      </property>
     </widget>
-    <widget class="QCheckBox" name="checkBoxContextMenu">
+    <widget class="QCheckBox" name="checkBoxLineWrap">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>30</y>
-       <width>185</width>
-       <height>19</height>
-      </rect>
-     </property>
-     <property name="whatsThis">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Omogoči vnos v kontekstnem meniju operacijskega sistema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-     <property name="text">
-      <string>Pokaži vnos v kontekstnem meniju</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
-     </property>
-    </widget>
-    <widget class="QCheckBox" name="checkBoxContextMenu_2">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>50</y>
        <width>121</width>
        <height>19</height>
       </rect>
@@ -173,6 +180,9 @@
        <width>20</width>
        <height>20</height>
       </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
      <property name="text">
       <string/>

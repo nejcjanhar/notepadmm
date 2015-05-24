@@ -7,13 +7,36 @@ Settings::Settings(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    saveFile.setFileName("settings.dat");
+
     ui->pushButtonCancel->setFocusPolicy(Qt::NoFocus);
     ui->pushButtonSave->setFocusPolicy(Qt::NoFocus);
     ui->pushButtonFont->setFocusPolicy(Qt::NoFocus);
+}
 
-    //load function
+void Settings::showEvent(QShowEvent *)
+{
+    if(!saveFile.open(QIODevice::ReadOnly))
+    {
+        if(saveFile.exists())
+            QMessageBox::critical(NULL,"Napaka pri branju","Datoteke settings.dat ni bilo mogoče odpreti za branje.");
 
-    ui->toolButtonColor->setStyleSheet("background-color: " + textColor.name());
+        return;
+    }
+    else
+    {
+        QDataStream in(&saveFile);
+
+        bool status,lineWrap;
+
+        in >> textColor >> textFont >> status >> lineWrap;
+
+        ui->checkBoxLineWrap->setChecked(lineWrap);
+        ui->checkBoxStatusBar->setChecked(status);
+        ui->toolButtonColor->setStyleSheet("background-color: " + textColor.name() + ";");
+    }
+
+    saveFile.close();
 }
 
 Settings::~Settings()
@@ -23,7 +46,21 @@ Settings::~Settings()
 
 void Settings::on_pushButtonSave_clicked()
 {
-    //save function
+
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        if(saveFile.exists())
+            QMessageBox::critical(NULL,"Napaka pri shranjevanju","Datoteke settings.dat ni bilo mogoče odpreti za pisanje.");
+
+        return;
+    }
+    QDataStream out(&saveFile);
+
+    out << textColor << textFont << ui->checkBoxStatusBar->isChecked() << ui->checkBoxLineWrap->isChecked();
+
+    saveFile.close();
+
+    this->close();
 }
 
 void Settings::on_pushButtonFont_clicked()
@@ -42,6 +79,11 @@ void Settings::on_toolButtonColor_clicked()
     if(color.isValid())
     {
         textColor = color;
-        ui->toolButtonColor->setStyleSheet("background-color: " + textColor.name());
+        ui->toolButtonColor->setStyleSheet("background-color: " + textColor.name() + ";");
     }
+}
+
+void Settings::on_pushButtonCancel_clicked()
+{
+    this->close();
 }

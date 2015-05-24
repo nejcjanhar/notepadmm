@@ -165,11 +165,11 @@ private:
 
     bool searchBarVisible;
     bool replaceBarVisible;
-
-    bool closingTabs;
+    bool statusBarVisible;
 
     int tabChanged(QString filename, QString text,int index);
     bool save(QString filename="",QString text="",int index=-2);
+    void loadSettings();
 
 };
 

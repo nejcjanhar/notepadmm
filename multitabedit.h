@@ -50,6 +50,10 @@ private:
     tabTextEdit *start;
     tabTextEdit *end;
     int tabZoom;
+    QColor textColor;
+    QFont textFont;
+    bool lineWrap;
+
     QFile saveFile;
 
 public:
@@ -91,6 +95,14 @@ public:
 
     void setZoom(int n);
     int getZoom();
+
+    QColor getTextColor();
+    QFont getTextFont();
+    bool getLineWrap();
+
+    void setTextColor(QColor color);
+    void setTextFont(QFont font);
+    void setLineWrap(bool b);
 
     void loadData();
     void saveData();

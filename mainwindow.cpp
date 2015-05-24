@@ -6,9 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    closingTabs = false;
+    QStringList arg = QCoreApplication::arguments();
+    statusBarVisible=true;
 
     tabEdit = new MultiTabEdit(this);
+    loadSettings();
 
     connect(QApplication::clipboard(),&QClipboard::dataChanged,this,&MainWindow::clipboardChanged);
     connect(tabEdit,&MultiTabEdit::tabChange,this,&MainWindow::tabChange);
@@ -23,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     searchBarVisible=false;
     replaceBarVisible=false;
+
+    if(arg.count() > 1)
+        tabEdit->addTab(arg.at(1));
 }
 
 void MainWindow::clipboardChanged()
@@ -44,7 +49,11 @@ void MainWindow::clipboardChanged()
 
 void MainWindow::resizeEvent(QResizeEvent * event)
 {
-    ui->statusWidget->move(QPoint(0,event->size().height()-40));
+    if(statusBarVisible)
+        ui->statusWidget->move(QPoint(0,event->size().height()-40));
+    else
+        ui->statusWidget->move(QPoint(0,event->size().height()-20));
+
     ui->statusWidget->resize(QSize(event->size().width(),20));
     ui->toolbarWidget->resize(QSize(event->size().width(),30));
     ui->toolButtonSwitch->move(QPoint(ui->statusWidget->width()-30,ui->statusWidget->pos().y()-25));
@@ -54,21 +63,23 @@ void MainWindow::resizeEvent(QResizeEvent * event)
         ui->replaceWidget->move(QPoint(0,ui->statusWidget->pos().y()));
         ui->searchWidget->move(QPoint(0,ui->replaceWidget->pos().y()));
         ui->toolButtonSwitch->move(QPoint(event->size().width()-30,event->size().height()));
+        tabEdit->resize(QSize(event->size().width()-5,ui->searchWidget->pos().y()-50));
     }
     else if(!replaceBarVisible)
     {
         ui->replaceWidget->move(0,ui->statusWidget->pos().y());
         ui->searchWidget->move(0,ui->replaceWidget->pos().y()-35);
+        tabEdit->resize(QSize(event->size().width()-5,ui->searchWidget->pos().y()-40));
     }
     else
     {
         ui->replaceWidget->move(0,ui->statusWidget->pos().y()-30);
         ui->searchWidget->move(0,ui->replaceWidget->pos().y()-30);
+        tabEdit->resize(QSize(event->size().width()-5,ui->searchWidget->pos().y()-40));
     }
 
     ui->statusLine->resize(QSize(event->size().width(),2));
     ui->statusLine->move(QPoint(0,ui->statusWidget->pos().y()-1));
-    tabEdit->resize(QSize(event->size().width()-5,ui->searchWidget->pos().y()-50));
 }
 
 
@@ -286,7 +297,7 @@ void MainWindow::on_actionNajdi_triggered()
         searchanimation->setEndValue(QPoint(0,ui->statusWidget->pos().y()));
         searchanimation->start(QAbstractAnimation::DeleteWhenStopped);
 
-        tabEdit->animate(200,QSize(width()-5,ui->statusWidget->pos().y()-40));
+        tabEdit->animate(200,QSize(width()-5,ui->statusWidget->pos().y()-50));
 
         QPropertyAnimation *switchanimation = new QPropertyAnimation(ui->toolButtonSwitch, "pos");
         switchanimation->setDuration(200);
@@ -457,6 +468,40 @@ void MainWindow::on_pushButtonReplaceAll_clicked()
 void MainWindow::on_actionNastavitve_triggered()
 {
     set->exec();
+    loadSettings();
+
+}
+
+void MainWindow::loadSettings()
+{
+    QFile setFile("settings.dat");
+
+    if(setFile.exists())
+    {
+        if(!setFile.open(QIODevice::ReadOnly))
+        {
+            QMessageBox::critical(NULL,"Napaka pri branju","Datoteke settings.dat ni bilo mogoče odpreti za branje.");
+            return;
+        }
+        else
+        {
+            QDataStream in(&setFile);
+            QColor textColor;
+            QFont textFont;
+            bool status,lineWrap;
+
+            in >> textColor >> textFont >> status >> lineWrap;
+
+            tabEdit->setTextColor(textColor);
+            tabEdit->setTextFont(textFont);
+            tabEdit->setLineWrap(lineWrap);
+            statusBarVisible = status;
+
+            this->resizeEvent(&QResizeEvent(this->size(),this->size()));
+        }
+
+    setFile.close();
+    }
 }
 
 void MainWindow::on_actionNov_triggered()
@@ -626,6 +671,10 @@ void MainWindow::tabChange(int index)
             curPlainTextEdit->zoomIn(tabEdit->getZoom());
             curTab->zoom=tabEdit->getZoom();
         }
+
+        curPlainTextEdit->setFont(tabEdit->getTextFont());
+        curPlainTextEdit->setStyleSheet("color: " + tabEdit->getTextColor().name() + ";");
+        curPlainTextEdit->setLineWrapMode((QPlainTextEdit::LineWrapMode)tabEdit->getLineWrap());
     }
 }
 
@@ -787,6 +836,8 @@ void MainWindow::on_actionEnkripteraj_triggered()
         }
         else
             QMessageBox::critical(this,"notepad--","Datoteka je odprta samo za branje");
+
+        file.close();
     }
 
 }
@@ -797,6 +848,7 @@ void MainWindow::on_actionDekripteraj_triggered()
     QFile file;
     QString key;
     QString decrypted;
+    QByteArray fileText;
 
     file.setFileName(QFileDialog::getOpenFileName(this,tr("Odpri šifrirano datoteko"),"*",tr("Binarne datoteke (*.dat);;Vse datoteke (*.*)")));
     if(file.exists())
@@ -808,12 +860,23 @@ void MainWindow::on_actionDekripteraj_triggered()
             file.open(QIODevice::ReadOnly);
             if(file.isReadable())
             {
-                decrypted = crypt.decryptToString(file.readAll());
-                tabEdit->addTab();
-                curPlainTextEdit->setPlainText(decrypted);
+                fileText = file.readAll();
+
+                decrypted = crypt.decryptToString(fileText);
+                if(crypt.lastError() == crypt.ErrorNoError)
+                {
+                    tabEdit->addTab();
+                    curPlainTextEdit->setPlainText(decrypted);
+                }
+                else if (crypt.lastError() == crypt.ErrorIntegrityFailed)
+                    QMessageBox::critical(this,"notepad--","Kluč je napačen.");
+                else if(crypt.lastError() == crypt.ErrorUnknownVersion)
+                    QMessageBox::warning(this,"notepad--","Datoteka ni šifrirana.");
             }
             else
                 QMessageBox::critical(this,"notepad--","Napaka pri odpiranju datoteke");
+
+            file.close();
         }
     }
 }
