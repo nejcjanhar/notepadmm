@@ -7,6 +7,8 @@
 #include <QTabWidget>
 #include <QPropertyAnimation>
 #include <QFileInfo>
+#include <QDebug>
+#include <QMessageBox>
 
 struct tabTextEdit
 {
@@ -14,7 +16,7 @@ struct tabTextEdit
     QWidget *tab;
 
     QString filename;
-    QIcon icon;
+    QString iconFileName;
     int zoom;
     bool textChanged;
     bool undoAvaible;
@@ -47,6 +49,8 @@ private:
     QTabWidget *tabWidget;
     tabTextEdit *start;
     tabTextEdit *end;
+    int tabZoom;
+    QFile saveFile;
 
 public:
     MultiTabEdit(QWidget *parent = 0,QString path="");
@@ -61,7 +65,7 @@ public:
 
     void move (QPoint point);
 
-    void setIcon(QIcon icon, int index);
+    void setIcon(QString iconpath, int index);
 
     int getCurrentTabIndex();
 
@@ -70,6 +74,8 @@ public:
     bool tabExists();
 
     tabTextEdit* getTab(int index);
+
+    void changeIndex(int index);
 
     bool getTextChanged(int index);
 
@@ -81,7 +87,13 @@ public:
 
     void setFileName(QString filename,int index);
 
-    int coutTabs();
+    int countTabs();
+
+    void setZoom(int n);
+    int getZoom();
+
+    void loadData();
+    void saveData();
 };
 
 #endif // MULTITABEDIT_H

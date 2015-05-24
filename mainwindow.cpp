@@ -6,13 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    zoom=0;
     closingTabs = false;
 
     tabEdit = new MultiTabEdit(this);
 
-    connect(QApplication::clipboard(), SIGNAL(dataChanged()),this, SLOT(clipboardChanged()));
+    connect(QApplication::clipboard(),&QClipboard::dataChanged,this,&MainWindow::clipboardChanged);
     connect(tabEdit,&MultiTabEdit::tabChange,this,&MainWindow::tabChange);
     connect(tabEdit,&MultiTabEdit::tabTextChange,this,&MainWindow::tabTextChange);
     connect(tabEdit,&MultiTabEdit::tabTextCurChange,this,&MainWindow::tabTextCurChange);
@@ -20,13 +18,11 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(tabEdit,&MultiTabEdit::tabTextRedoAvaible,this,&MainWindow::tabTextRedoAvaible);
     connect(tabEdit,&MultiTabEdit::tabTextUndoAvaible,this,&MainWindow::tabTextUndoAvaible);
 
-    tabChange(0);
+    tabEdit->tabChange(tabEdit->getCurrentTabIndex());
     tabEdit->move(QPoint(0,60));
 
     searchBarVisible=false;
     replaceBarVisible=false;
-
-
 }
 
 void MainWindow::clipboardChanged()
@@ -38,11 +34,11 @@ void MainWindow::clipboardChanged()
             ui->actionPrilepi->setEnabled(true);
             ui->toolButtonPaste->setEnabled(true);
         }
-    }
-    else
-    {
-        ui->actionPrilepi->setEnabled(false);
-        ui->toolButtonPaste->setEnabled(false);
+        else
+        {
+            ui->actionPrilepi->setEnabled(false);
+            ui->toolButtonPaste->setEnabled(false);
+        }
     }
 }
 
@@ -70,8 +66,8 @@ void MainWindow::resizeEvent(QResizeEvent * event)
         ui->searchWidget->move(0,ui->replaceWidget->pos().y()-30);
     }
 
-    ui->line_5->resize(QSize(event->size().width(),2));
-    ui->line_5->move(QPoint(0,ui->statusWidget->pos().y()-1));
+    ui->statusLine->resize(QSize(event->size().width(),2));
+    ui->statusLine->move(QPoint(0,ui->statusWidget->pos().y()-1));
     tabEdit->resize(QSize(event->size().width()-5,ui->searchWidget->pos().y()-50));
 }
 
@@ -105,7 +101,7 @@ void MainWindow::on_actionShrani_triggered()
 {
     curFilename = tabEdit->getFileName(curIndex);
     if (curFilename.isEmpty())
-        curFilename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*","Tekstovne datoteke (*.txt);;Vse datoteke (*.*)");
+        curFilename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*",tr("Tekstovne datoteke (*.txt);;Vse datoteke (*.*)"));
 
     if(curFilename.isEmpty())
         return;
@@ -115,7 +111,8 @@ void MainWindow::on_actionShrani_triggered()
 
 void MainWindow::on_actionShrani_kot_triggered()
 {
-    curFilename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"), curFilename,"Tekstovne datoteke (*.txt);;Vse datoteke (*.*)");
+    curFilename=tabEdit->getFileName(curIndex);
+    curFilename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"), curFilename,tr("Tekstovne datoteke (*.txt);;Vse datoteke (*.*)"));
 
     if(curFilename.isEmpty())
         return;
@@ -128,9 +125,17 @@ bool MainWindow::save(QString filename,QString text,int index)
     QFile file;
 
     if(filename.isEmpty())
+    {
         file.setFileName(curFilename);
+        tabEdit->setFileName(curFilename,curIndex);
+    }
     else
+    {
         file.setFileName(filename);
+        tabEdit->setFileName(filename,index);
+    }
+
+
 
     file.open(QIODevice::WriteOnly | QIODevice::Text);
     if(file.isWritable())
@@ -151,20 +156,22 @@ bool MainWindow::save(QString filename,QString text,int index)
     if(index==-2)
     {
         tabEdit->setTextChanged(false,curIndex);
-        tabEdit->setIcon(QIcon("resources\\icons\\save.png"),curIndex);
+        tabEdit->setIcon("resources\\icons\\save.png",curIndex);
         setWindowTitle("notepad-- [" + curFilename +"]");
     }
     else
     {
         tabEdit->setTextChanged(false,index);
-        tabEdit->setIcon(QIcon("resources\\icons\\save.png"),index);
+        tabEdit->setIcon("resources\\icons\\save.png",index);
     }
 
     return true;
 }
 
-int MainWindow::fileChanged(QString filename, QString text,int index)
+int MainWindow::tabChanged(QString filename, QString text,int index)
 {
+    if(tabEdit->getTab(index)==NULL)return -1;
+
     filename = tabEdit->getFileName(index);
 
     QMessageBox msgBox;
@@ -188,8 +195,12 @@ int MainWindow::fileChanged(QString filename, QString text,int index)
                 return result;
         }
 
-
-        msgBox.setText("<font color=""silver"" size=""5"">Ali želiti shraniti spremembe?</font>");
+        int tmpIndex=curIndex;
+        tabEdit->changeIndex(index);
+        if(filename.isEmpty())
+            msgBox.setText("<font color=""silver"" size=""5"">Shrani \"neimenovana\"?</font>");
+        else
+            msgBox.setText("<font color=""silver"" size=""5"">Shrani \"" + filename +"\"?</font>");
         msgBox.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
         msgBox.setDefaultButton(QMessageBox::Save);
         result=msgBox.exec();
@@ -197,21 +208,21 @@ int MainWindow::fileChanged(QString filename, QString text,int index)
         {
             if (filename.isEmpty())
             {
-                filename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*","Tekstovne datoteke (*.txt);;Vse datoteke (*.*)");
+                filename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*",tr("Tekstovne datoteke (*.txt);;Vse datoteke (*.*)"));
                 if(!filename.isEmpty())
                     tabEdit->setFileName(filename,index);
             }
             if(!save())
                 result=QMessageBox::Cancel;
         }
+        tabEdit->changeIndex(tmpIndex);
     }
-
     return result;
 }
 
  void MainWindow::closeEvent(QCloseEvent *event)
  {
-
+    tabEdit->saveData();
  }
 
 void MainWindow::on_actionOdpri_triggered()
@@ -242,7 +253,7 @@ void MainWindow::on_actionZavrzi_spremembe_triggered()
         file.close();
     }
 
-    tabEdit->setIcon(QIcon("resources\\icons\\save.png"),curIndex);
+    tabEdit->setIcon("resources\\icons\\save.png",curIndex);
     tabEdit->setTextChanged(false,curIndex);
     ui->actionZavrzi_spremembe->setEnabled(false);
 }
@@ -257,7 +268,7 @@ void MainWindow::on_actionNajdi_triggered()
         searchanimation->setEndValue(QPoint(0, ui->statusWidget->pos().y()-35));
         searchanimation->start(QAbstractAnimation::DeleteWhenStopped);
 
-        tabEdit->animate(200,QSize(width(), ui->statusWidget->pos().y()-75));
+        tabEdit->animate(200,QSize(width()-5, ui->statusWidget->pos().y()-75));
 
         QPropertyAnimation *switchanimation = new QPropertyAnimation(ui->toolButtonSwitch, "pos");
         switchanimation->setDuration(200);
@@ -269,13 +280,13 @@ void MainWindow::on_actionNajdi_triggered()
     }
     else
     {
-        tabEdit->animate(200,QSize(width(),ui->statusWidget->pos().y()-40));
-
         QPropertyAnimation *searchanimation = new QPropertyAnimation(ui->searchWidget, "pos");
         searchanimation->setDuration(200);
         searchanimation->setStartValue(ui->searchWidget->pos());
         searchanimation->setEndValue(QPoint(0,ui->statusWidget->pos().y()));
         searchanimation->start(QAbstractAnimation::DeleteWhenStopped);
+
+        tabEdit->animate(200,QSize(width()-5,ui->statusWidget->pos().y()-40));
 
         QPropertyAnimation *switchanimation = new QPropertyAnimation(ui->toolButtonSwitch, "pos");
         switchanimation->setDuration(200);
@@ -369,7 +380,7 @@ void MainWindow::on_toolButtonSwitch_clicked()
 {
     if(!replaceBarVisible)
     {
-        tabEdit->animate(200,QSize(width(), ui->statusWidget->pos().y()-100));
+        tabEdit->animate(200,QSize(width()-5, ui->statusWidget->pos().y()-100));
 
         QPropertyAnimation *searchanimation = new QPropertyAnimation(ui->searchWidget, "pos");
         searchanimation->setDuration(200);
@@ -388,7 +399,7 @@ void MainWindow::on_toolButtonSwitch_clicked()
     }
     else
     {
-        tabEdit->animate(200,QSize(width(),ui->statusWidget->pos().y()-75));
+        tabEdit->animate(200,QSize(width()-5,ui->statusWidget->pos().y()-75));
 
         QPropertyAnimation *searchanimation = new QPropertyAnimation(ui->searchWidget, "pos");
         searchanimation->setDuration(200);
@@ -539,21 +550,22 @@ void MainWindow::on_toolButtonZoomOut_clicked()
 void MainWindow::on_actionPovecaj_triggered()
 {
     curPlainTextEdit->zoomIn();
-    zoom++;
-    curTab->zoom=zoom;
+    tabEdit->setZoom(tabEdit->getZoom()+1);
+    curTab->zoom=tabEdit->getZoom();
 }
 
 void MainWindow::on_actionPomanjsaj_triggered()
 {
     curPlainTextEdit->zoomOut();
-    zoom--;
-    curTab->zoom=zoom;
+    tabEdit->setZoom(tabEdit->getZoom()-1);
+    curTab->zoom=tabEdit->getZoom();
 }
 
 void MainWindow::on_actionPrivzeta_povecava_triggered()
 {
-    curPlainTextEdit->zoomOut(zoom);
-    zoom=0;
+    curPlainTextEdit->zoomOut(tabEdit->getZoom());
+    curTab->zoom=tabEdit->getZoom();
+    tabEdit->setZoom(0);
 }
 
 void MainWindow::tabChange(int index)
@@ -567,6 +579,9 @@ void MainWindow::tabChange(int index)
         curTab = tabEdit->getTab(index);
 
         curFilename = tabEdit->getFileName(index);
+        if(curFilename.isEmpty())
+            ui->actionOdpri_v_mapi->setEnabled(false);
+        else ui->actionOdpri_v_mapi->setEnabled(true);
 
         ui->labelLenght->setText(QString::number(curPlainTextEdit->toPlainText().length()));
         ui->labelLines->setText(QString::number(curPlainTextEdit->blockCount()));
@@ -605,21 +620,23 @@ void MainWindow::tabChange(int index)
         else
             ui->actionZavrzi_spremembe->setEnabled(false);
 
-        if(curTab->zoom!=zoom)
+        if(curTab->zoom!=tabEdit->getZoom())
         {
             curPlainTextEdit->zoomOut(curTab->zoom);
-            curPlainTextEdit->zoomIn(zoom);
-            curTab->zoom=zoom;
+            curPlainTextEdit->zoomIn(tabEdit->getZoom());
+            curTab->zoom=tabEdit->getZoom();
         }
     }
 }
 
 void MainWindow::tabTextChange()
 {
-    tabEdit->setTextChanged(true,curIndex);
-    tabEdit->setIcon(QIcon("resources\\icons\\unsaved.png"),curIndex);
-
-    ui->actionZavrzi_spremembe->setEnabled(true);
+    if(tabEdit->getTextChanged(curIndex)==false)
+    {
+        tabEdit->setTextChanged(true,curIndex);
+        tabEdit->setIcon("resources\\icons\\unsaved.png",curIndex);
+        ui->actionZavrzi_spremembe->setEnabled(true);
+    }
 }
 
 void MainWindow::tabTextCurChange()
@@ -657,7 +674,8 @@ void MainWindow::tabTextUndoAvaible(bool b)
 
 void MainWindow::on_actionZapri_triggered()
 {
-    tabEdit->remTab(curIndex);
+    if(tabChanged(curFilename,curPlainTextEdit->toPlainText(),curIndex)!=QMessageBox::Cancel)
+        tabEdit->remTab(curIndex);
 }
 
 void MainWindow::on_toolButtonClose_clicked()
@@ -678,12 +696,13 @@ void MainWindow::on_toolButtonCloseAll_clicked()
 void MainWindow::on_actionShrani_vse_triggered()
 {
     QString filename;
-    for(int i=0;i<tabEdit->coutTabs();i++)
+    for(int i=0;i<tabEdit->countTabs();i++)
     {
         filename = tabEdit->getFileName(i);
+        tabEdit->changeIndex(i);
         if(filename.isEmpty())
         {
-            filename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*","Tekstovne datoteke (*.txt);;Vse datoteke (*.*)");
+            filename = QFileDialog::getSaveFileName(this,tr("Shrani datoteko"),"*",tr("Tekstovne datoteke (*.txt);;Vse datoteke (*.*)"));
             if(!filename.isEmpty())
                 tabEdit->setFileName(filename,i);
             else continue;
@@ -696,9 +715,105 @@ void MainWindow::on_actionZapri_vse_triggered()
 {
     while(true)
     {
-     if(fileChanged(tabEdit->getFileName(0),tabEdit->getEdit(0)->toPlainText(),0)==QMessageBox::Cancel)
+     if(tabChanged(tabEdit->getFileName(0),tabEdit->getEdit(0)->toPlainText(),0)==QMessageBox::Cancel)
          continue;
 
      if(!tabEdit->remTab(0))break;
+    }
+}
+
+void MainWindow::on_actionOdpri_v_mapi_triggered()
+{
+    QString argv = QLatin1String("/select,");
+    QString explorer = QLatin1String("explorer.exe");
+    argv+=QDir::toNativeSeparators(curFilename);
+    QProcess::startDetached(explorer+" "+argv);
+}
+
+void MainWindow::on_actionZapri_vse_razen_tega_triggered()
+{
+    ui->actionZapri_vse_na_levo->trigger();
+    ui->actionZapri_vse_na_desno->trigger();
+}
+
+void MainWindow::on_actionZapri_vse_na_levo_triggered()
+{
+    int i=0;
+    while(curIndex!=i)
+    {
+        if(tabChanged(tabEdit->getFileName(i),tabEdit->getEdit(i)->toPlainText(),i)==QMessageBox::Cancel)
+        {
+            i++;
+            continue;
+        }
+        tabEdit->remTab(i);
+    }
+}
+
+void MainWindow::on_actionZapri_vse_na_desno_triggered()
+{
+    int i=1;
+    while(true)
+    {
+        if(tabEdit->getTab(curIndex+i)==NULL)break;
+        if(tabChanged(tabEdit->getFileName(curIndex+i),tabEdit->getEdit(curIndex+i)->toPlainText(),curIndex+i)==QMessageBox::Cancel)
+        {
+            i++;
+            continue;
+        }
+        tabEdit->remTab(curIndex+i);
+    }
+}
+
+void MainWindow::on_actionEnkripteraj_triggered()
+{
+    SimpleCrypt crypt;
+    QFile file;
+    QString key;
+    QByteArray encrypted;
+
+    key = QInputDialog::getText(this,"notepad--","Vnesi ključ za šifriranje",QLineEdit::Password);
+    if(!key.isEmpty())
+    {
+        file.setFileName(QFileDialog::getSaveFileName(this,tr("Shrani šifrirano datoteko"),"*",tr("Binarne datoteke (*.dat);;Vse datoteke (*.*)")));
+        crypt.setKey(key.toLong());
+        encrypted = crypt.encryptToByteArray(curPlainTextEdit->toPlainText().toUtf8());
+
+        file.open(QIODevice::WriteOnly);
+        if(file.isWritable())
+        {
+            file.write(encrypted);
+            tabEdit->remTab(curIndex);
+        }
+        else
+            QMessageBox::critical(this,"notepad--","Datoteka je odprta samo za branje");
+    }
+
+}
+
+void MainWindow::on_actionDekripteraj_triggered()
+{
+    SimpleCrypt crypt;
+    QFile file;
+    QString key;
+    QString decrypted;
+
+    file.setFileName(QFileDialog::getOpenFileName(this,tr("Odpri šifrirano datoteko"),"*",tr("Binarne datoteke (*.dat);;Vse datoteke (*.*)")));
+    if(file.exists())
+    {
+        key = QInputDialog::getText(this,"notepad--","Vnesi ključ",QLineEdit::Password);
+        if(!key.isEmpty())
+        {
+            crypt.setKey(key.toLong());
+            file.open(QIODevice::ReadOnly);
+            if(file.isReadable())
+            {
+                decrypted = crypt.decryptToString(file.readAll());
+                tabEdit->addTab();
+                curPlainTextEdit->setPlainText(decrypted);
+            }
+            else
+                QMessageBox::critical(this,"notepad--","Napaka pri odpiranju datoteke");
+        }
     }
 }

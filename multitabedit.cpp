@@ -2,7 +2,11 @@
 
 MultiTabEdit::MultiTabEdit(QWidget *widget,QString path)
 {
+    saveFile.setFileName("last.dat");
+
+    tabZoom=0;
     tabWidget = new QTabWidget(widget);
+
     connect(tabWidget,&QTabWidget::currentChanged,this,&MultiTabEdit::tabChange);
 
     QString tabName;
@@ -11,7 +15,7 @@ MultiTabEdit::MultiTabEdit(QWidget *widget,QString path)
     tmpTab->tab = new QWidget;
     tmpTab->edit = new QPlainTextEdit(tmpTab->tab);
 
-    tmpTab->icon.addFile("resources\\icons\\save.png");
+    tmpTab->iconFileName="resources\\icons\\save.png";
     tmpTab->canCopy = false;
     tmpTab->redoAvaible = false;
     tmpTab->undoAvaible = false;
@@ -49,7 +53,7 @@ MultiTabEdit::MultiTabEdit(QWidget *widget,QString path)
     tmpTab->prevTabEdit=tmpTab->nextTabEdit=NULL;
     start=end=tmpTab;
 
-    tabWidget->addTab(tmpTab->tab,tmpTab->icon,tabName);
+    tabWidget->addTab(tmpTab->tab,QIcon(tmpTab->iconFileName),tabName);
     tmpTab->index = tabWidget->indexOf(tmpTab->tab);
 
     tabWidget->setCurrentIndex(tmpTab->index);
@@ -61,6 +65,8 @@ MultiTabEdit::MultiTabEdit(QWidget *widget,QString path)
     connect(tmpTab->edit,&QPlainTextEdit::copyAvailable,this,&MultiTabEdit::tabTextCopyAvaible);
     connect(tmpTab->edit,&QPlainTextEdit::undoAvailable,this,&MultiTabEdit::tabTextUndoAvaible);
     connect(tmpTab->edit,&QPlainTextEdit::redoAvailable,this,&MultiTabEdit::tabTextRedoAvaible);
+
+    loadData();
 }
 
 MultiTabEdit::~MultiTabEdit()
@@ -77,7 +83,7 @@ void MultiTabEdit::addTab(QString path)
     tmpTab->tab = new QWidget;
     tmpTab->edit = new QPlainTextEdit(tmpTab->tab);
 
-    tmpTab->icon.addFile("resources\\icons\\save.png");
+    tmpTab->iconFileName="resources\\icons\\save.png";
     tmpTab->canCopy = false;
     tmpTab->redoAvaible = false;
     tmpTab->undoAvaible = false;
@@ -117,7 +123,7 @@ void MultiTabEdit::addTab(QString path)
     start->prevTabEdit=tmpTab;
     start=tmpTab;
 
-    tabWidget->addTab(tmpTab->tab,tmpTab->icon,tabName);
+    tabWidget->addTab(tmpTab->tab,QIcon(tmpTab->iconFileName),tabName);
     tmpTab->index = tabWidget->indexOf(tmpTab->tab);
 
     tabWidget->setCurrentIndex(tmpTab->index);
@@ -137,6 +143,8 @@ bool MultiTabEdit::remTab(int index)
     bool result = true;
 
     curTab=getTab(index);
+    if(curTab==NULL)
+        return false;
 
     if(curTab==end && curTab==start)
     {
@@ -144,7 +152,7 @@ bool MultiTabEdit::remTab(int index)
         tmpTab->tab = new QWidget;
         tmpTab->edit = new QPlainTextEdit(tmpTab->tab);
 
-        tmpTab->icon.addFile("resources\\icons\\save.png");
+        tmpTab->iconFileName="resources\\icons\\save.png";
         tmpTab->canCopy = false;
         tmpTab->redoAvaible = false;
         tmpTab->undoAvaible = false;
@@ -159,7 +167,7 @@ bool MultiTabEdit::remTab(int index)
         start->prevTabEdit=tmpTab;
         start=tmpTab;
 
-        tabWidget->addTab(tmpTab->tab,tmpTab->icon,"neimenovana");
+        tabWidget->addTab(tmpTab->tab,QIcon(tmpTab->iconFileName),"neimenovana");
         tmpTab->index = tabWidget->indexOf(tmpTab->tab);
 
         tabWidget->setCurrentIndex(tmpTab->index);
@@ -248,7 +256,7 @@ void MultiTabEdit::animate(int duration,QSize endValue)
     QPropertyAnimation *editAnimation = new QPropertyAnimation(edit, "size");
     editAnimation->setDuration(duration);
     editAnimation->setStartValue(edit->size());
-    editAnimation->setEndValue(endValue);
+    editAnimation->setEndValue(QSize(endValue.width()-10,endValue.height()-35));
     editAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 
@@ -272,11 +280,16 @@ QString MultiTabEdit::getFileName(int index)
 void MultiTabEdit::setFileName(QString filename, int index)
 {
     getTab(index)->filename = filename;
+    if(!filename.isEmpty())
+    {
+        QFileInfo info(filename);
+        tabWidget->setTabText(index,info.fileName());
+    }
 }
 
 bool MultiTabEdit::getTextChanged(int index)
 {
-    return &getTab(index)->textChanged;
+    return getTab(index)->textChanged;
 }
 
 void MultiTabEdit::setTextChanged(bool change, int index)
@@ -284,14 +297,113 @@ void MultiTabEdit::setTextChanged(bool change, int index)
     getTab(index)->textChanged = change;
 }
 
-void MultiTabEdit::setIcon(QIcon icon, int index)
+void MultiTabEdit::setIcon(QString iconpath, int index)
 {
-    tabWidget->setTabIcon(index,icon);
+    tabWidget->setTabIcon(index,QIcon(iconpath));
+    getTab(index)->iconFileName=iconpath;
 }
 
-int MultiTabEdit::coutTabs()
+int MultiTabEdit::countTabs()
 {
     return tabWidget->count();
 }
 
+int MultiTabEdit::getZoom()
+{
+    return tabZoom;
+}
+
+void MultiTabEdit::setZoom(int n)
+{
+    tabZoom=n;
+}
+
+void MultiTabEdit::saveData()
+{
+    if(!saveFile.open(QIODevice::WriteOnly))
+    {
+        if(saveFile.exists())
+        {
+            int result=QMessageBox::critical(NULL,"Napaka pri shranjevanju","Datoteke last.dat ni bilo mogoce odpreti za pisanje.",QMessageBox::Retry | QMessageBox::Ok);
+            if(result==QMessageBox::Retry)
+                loadData();
+        }
+        return;
+    }
+    QDataStream out(&saveFile);
+
+    out<<tabWidget->currentIndex();
+    out<<tabZoom;
+    for(tabTextEdit *tmpTab=end;tmpTab!=NULL;tmpTab=tmpTab->prevTabEdit)
+        out<< tmpTab->filename << tmpTab->iconFileName << tmpTab->edit->toPlainText()
+          << tmpTab->edit->textCursor().selectionStart() << tmpTab->edit->textCursor().selectionEnd() << tmpTab->textChanged;
+
+    saveFile.close();
+}
+
+void MultiTabEdit::loadData()
+{
+    if(!saveFile.open(QIODevice::ReadOnly))
+    {
+        if(saveFile.exists())
+        {
+            int result=QMessageBox::critical(NULL,"notepad--","Datoteke last.dat ni bilo mogoce odpreti za branje.",QMessageBox::Retry | QMessageBox::Ok);
+            if(result==QMessageBox::Retry)
+                loadData();
+        }
+        return;
+    }
+    QDataStream in(&saveFile);
+
+    int index;
+    int curIndex;
+    int cursStart;
+    int cursEnd;
+    QString filename;
+    QString iconFileName;
+    QString text;
+    QTextCursor curs;
+    bool textChanged;
+    QFileInfo tmpfileinfo;
+
+    in >> curIndex;
+    in >> tabZoom;
+    while(!in.atEnd())
+    {
+        in >> filename;
+        in >> iconFileName;
+        in >> text;
+        in >> cursStart;
+        in >> cursEnd;
+        in >> textChanged;
+
+        if(!filename.isEmpty())
+        {
+            tmpfileinfo.setFile(filename);
+            if(!tmpfileinfo.exists())
+                continue;
+        }
+
+        addTab(filename);
+        index = tabWidget->currentIndex();
+        setIcon(iconFileName,index);
+        getTab(index)->edit->setPlainText(text);
+        getTab(index)->edit->zoomOut(tabZoom);
+        getTab(index)->zoom=tabZoom;
+        curs = getTab(index)->edit->textCursor();
+        curs.setPosition(cursStart);
+        curs.setPosition(cursEnd,QTextCursor::KeepAnchor);
+        getTab(index)->edit->setTextCursor(curs);
+        getTab(index)->textChanged = textChanged;
+    }
+
+    remTab(0);
+    tabWidget->setCurrentIndex(curIndex);
+    saveFile.close();
+}
+
+void MultiTabEdit::changeIndex(int index)
+{
+    tabWidget->setCurrentIndex(index);
+}
 

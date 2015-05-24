@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     settings.cpp \
-    multitabedit.cpp
+    multitabedit.cpp \
+    simplecrypt.cpp
 
 HEADERS  += mainwindow.h \
     settings.h \
-    multitabedit.h
+    multitabedit.h \
+    simplecrypt.h
 
 FORMS    += mainwindow.ui \
     settings.ui

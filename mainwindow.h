@@ -11,7 +11,10 @@
 #include <QPrintDialog>
 #include <QPainter>
 #include <QPageSetupDialog>
+#include <QProcess>
+#include <QInputDialog>
 
+#include "simplecrypt.h"
 #include "settings.h"
 #include "multitabedit.h"
 
@@ -133,6 +136,18 @@ private slots:
 
     void on_actionZapri_vse_triggered();
 
+    void on_actionOdpri_v_mapi_triggered();
+
+    void on_actionZapri_vse_razen_tega_triggered();
+
+    void on_actionZapri_vse_na_levo_triggered();
+
+    void on_actionZapri_vse_na_desno_triggered();
+
+    void on_actionEnkripteraj_triggered();
+
+    void on_actionDekripteraj_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -153,10 +168,9 @@ private:
 
     bool closingTabs;
 
-    int zoom;
-
-    int fileChanged(QString filename, QString text,int index);
+    int tabChanged(QString filename, QString text,int index);
     bool save(QString filename="",QString text="",int index=-2);
+
 };
 
 #endif // MAINWINDOW_H

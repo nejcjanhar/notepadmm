@@ -31,6 +31,9 @@
   <property name="windowTitle">
    <string>Nastavitve</string>
   </property>
+  <property name="whatsThis">
+   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Okno nastavitev&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+  </property>
   <widget class="QPushButton" name="pushButtonCancel">
    <property name="geometry">
     <rect>
@@ -41,7 +44,7 @@
     </rect>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zapri okno in neshrani nastavitev&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Zapri okno in ne shrani nastavitev&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>Prekliči</string>
@@ -53,19 +56,22 @@
   <widget class="QPushButton" name="pushButtonSave">
    <property name="geometry">
     <rect>
-     <x>150</x>
+     <x>230</x>
      <y>270</y>
      <width>75</width>
      <height>23</height>
     </rect>
    </property>
    <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shrani nastavitve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shrani nastavitve in zapri&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
    <property name="text">
     <string>Shrani</string>
    </property>
    <property name="autoDefault">
+    <bool>false</bool>
+   </property>
+   <property name="default">
     <bool>false</bool>
    </property>
   </widget>
@@ -78,13 +84,19 @@
      <height>250</height>
     </rect>
    </property>
+   <property name="whatsThis">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Okno nastavitev&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
    <property name="tabShape">
     <enum>QTabWidget::Triangular</enum>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tabGeneral">
+    <property name="whatsThis">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Osnovne nastavitve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <attribute name="title">
      <string> Osnovno</string>
     </attribute>
@@ -94,8 +106,11 @@
        <x>10</x>
        <y>10</y>
        <width>120</width>
-       <height>17</height>
+       <height>19</height>
       </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Pokaži ali skrij vrstico stanja&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>Pokaži vrstico stanja</string>
@@ -110,8 +125,11 @@
        <x>10</x>
        <y>30</y>
        <width>185</width>
-       <height>17</height>
+       <height>19</height>
       </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Omogoči vnos v kontekstnem meniju operacijskega sistema&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="text">
       <string>Pokaži vnos v kontekstnem meniju</string>
@@ -120,31 +138,86 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checkBoxContextMenu_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>121</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <property name="whatsThis">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Ob koncu vrstice okna naj gre tekst v novo vrstico&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="text">
+      <string>Omogoči &quot;line wrap&quot;</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QWidget" name="tabStye">
+    <property name="whatsThis">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Nastavitve sloga&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <attribute name="title">
      <string> Slog</string>
     </attribute>
+    <widget class="QToolButton" name="toolButtonColor">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>43</y>
+       <width>20</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>15</y>
+       <width>47</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Pisava: </string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButtonFont">
+     <property name="geometry">
+      <rect>
+       <x>50</x>
+       <y>10</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Izberi pisavo</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>45</y>
+       <width>71</width>
+       <height>13</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Barva pisave:</string>
+     </property>
+    </widget>
    </widget>
-  </widget>
-  <widget class="QPushButton" name="pushButtonApply">
-   <property name="geometry">
-    <rect>
-     <x>230</x>
-     <y>270</y>
-     <width>75</width>
-     <height>23</height>
-    </rect>
-   </property>
-   <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shrani nastavitve&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="text">
-    <string>Uporabi</string>
-   </property>
-   <property name="autoDefault">
-    <bool>false</bool>
-   </property>
   </widget>
  </widget>
  <resources/>

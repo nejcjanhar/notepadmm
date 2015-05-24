@@ -228,7 +228,7 @@ QPushButton#pushButton_fullword:checked
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QLabel" name="labelSeach_2">
+    <widget class="QLabel" name="labelSeachDir">
      <property name="geometry">
       <rect>
        <x>470</x>
@@ -273,16 +273,16 @@ QPushButton#pushButton_fullword:checked
     <property name="styleSheet">
      <string notr="true"/>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>2</x>
-       <y>1</y>
+       <x>1</x>
+       <y>0</y>
        <width>649</width>
        <height>33</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <layout class="QHBoxLayout" name="menuLayout">
       <item>
        <widget class="QToolButton" name="toolButtonNew">
         <property name="enabled">
@@ -478,7 +478,7 @@ QPushButton#pushButton_fullword:checked
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line">
+       <widget class="Line" name="lineMenuSplit">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -563,7 +563,7 @@ QPushButton#pushButton_fullword:checked
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_2">
+       <widget class="Line" name="lineMenuSplit_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -622,7 +622,7 @@ QPushButton#pushButton_fullword:checked
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_3">
+       <widget class="Line" name="lineMenuSplit_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -658,7 +658,7 @@ QPushButton#pushButton_fullword:checked
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_4">
+       <widget class="Line" name="lineMenuSplit_4">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -717,7 +717,7 @@ QPushButton#pushButton_fullword:checked
        </widget>
       </item>
       <item>
-       <widget class="Line" name="line_6">
+       <widget class="Line" name="lineMenuSplit_5">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
@@ -938,7 +938,7 @@ QPushButton#pushButton_fullword:checked
      </layout>
     </widget>
    </widget>
-   <widget class="Line" name="line_5">
+   <widget class="Line" name="statusLine">
     <property name="geometry">
      <rect>
       <x>0</x>
@@ -956,7 +956,7 @@ QPushButton#pushButton_fullword:checked
    <zorder>toolButtonSwitch</zorder>
    <zorder>replaceWidget</zorder>
    <zorder>statusWidget</zorder>
-   <zorder>line_5</zorder>
+   <zorder>statusLine</zorder>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -971,14 +971,24 @@ QPushButton#pushButton_fullword:checked
     <property name="title">
      <string>Datoteka</string>
     </property>
+    <widget class="QMenu" name="menuZapri_vec">
+     <property name="title">
+      <string>Zapri vec</string>
+     </property>
+     <addaction name="actionZapri_vse_razen_tega"/>
+     <addaction name="actionZapri_vse_na_levo"/>
+     <addaction name="actionZapri_vse_na_desno"/>
+    </widget>
     <addaction name="actionNov"/>
     <addaction name="actionOdpri"/>
+    <addaction name="actionOdpri_v_mapi"/>
     <addaction name="actionShrani"/>
     <addaction name="actionShrani_vse"/>
     <addaction name="actionShrani_kot"/>
     <addaction name="separator"/>
     <addaction name="actionZapri"/>
     <addaction name="actionZapri_vse"/>
+    <addaction name="menuZapri_vec"/>
     <addaction name="separator"/>
     <addaction name="actionNastavitev_strani"/>
     <addaction name="actionNatisni"/>
@@ -1015,8 +1025,16 @@ QPushButton#pushButton_fullword:checked
     <addaction name="actionPomanjsaj"/>
     <addaction name="actionPrivzeta_povecava"/>
    </widget>
+   <widget class="QMenu" name="menuEnkripcija">
+    <property name="title">
+     <string>Enkripcija</string>
+    </property>
+    <addaction name="actionEnkripteraj"/>
+    <addaction name="actionDekripteraj"/>
+   </widget>
    <addaction name="menuDatoteka"/>
    <addaction name="menuUredi"/>
+   <addaction name="menuEnkripcija"/>
    <addaction name="menuPogled"/>
    <addaction name="menuNastavitve"/>
   </widget>
@@ -1181,6 +1199,36 @@ QPushButton#pushButton_fullword:checked
   <action name="actionZapri_vse">
    <property name="text">
     <string>Zapri vse</string>
+   </property>
+  </action>
+  <action name="actionOdpri_v_mapi">
+   <property name="text">
+    <string>Odpri v mapi</string>
+   </property>
+  </action>
+  <action name="actionZapri_vse_razen_tega">
+   <property name="text">
+    <string>Zapri vse razen tega</string>
+   </property>
+  </action>
+  <action name="actionZapri_vse_na_levo">
+   <property name="text">
+    <string>Zapri vse na levo</string>
+   </property>
+  </action>
+  <action name="actionZapri_vse_na_desno">
+   <property name="text">
+    <string>Zapri vse na desno</string>
+   </property>
+  </action>
+  <action name="actionEnkripteraj">
+   <property name="text">
+    <string>Zašifriraj</string>
+   </property>
+  </action>
+  <action name="actionDekripteraj">
+   <property name="text">
+    <string>Odšifriraj</string>
    </property>
   </action>
  </widget>
