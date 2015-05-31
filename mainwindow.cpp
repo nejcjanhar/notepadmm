@@ -825,19 +825,22 @@ void MainWindow::on_actionEnkripteraj_triggered()
     if(!key.isEmpty())
     {
         file.setFileName(QFileDialog::getSaveFileName(this,tr("Shrani šifrirano datoteko"),"*",tr("Binarne datoteke (*.dat);;Vse datoteke (*.*)")));
-        crypt.setKey(key.toLong());
-        encrypted = crypt.encryptToByteArray(curPlainTextEdit->toPlainText().toUtf8());
-
-        file.open(QIODevice::WriteOnly);
-        if(file.isWritable())
+        if(!file.fileName().isEmpty())
         {
-            file.write(encrypted);
-            tabEdit->remTab(curIndex);
-        }
-        else
-            QMessageBox::critical(this,"notepad--","Datoteka je odprta samo za branje");
+            crypt.setKey(key.toLong());
+            encrypted = crypt.encryptToByteArray(curPlainTextEdit->toPlainText().toUtf8());
 
-        file.close();
+            file.open(QIODevice::WriteOnly);
+            if(file.isWritable())
+            {
+                file.write(encrypted);
+                tabEdit->remTab(curIndex);
+            }
+            else
+                QMessageBox::critical(this,"notepad--","Datoteka je odprta samo za branje");
+
+            file.close();
+        }
     }
 
 }
